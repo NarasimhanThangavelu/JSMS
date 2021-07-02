@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.narpavi.jsms.dao.JSMSDaoMapper">
+
+	<resultMap type="cutomerDetails" id="result">
+		<id property="id" column="CUSTOMER_ID" />
+		<result property="customerDetail" column="CUSTOMER_DETAILS_CLOB" typeHandler="com.narpavi.common.typehandler.CustomerDetailTypeHandler"/>
+		<!-- <result property="empName" column="EMP_NAME" />
+		<result property="empEmail" column="EMP_EMAIL" />
+		<result property="empWebsite" column="EMP_WEBSITE" />
+		<result property="empPrimaryContactNumber"
+			column="EMP_PRI_CONTACT_NUM" />
+		<result property="empSecondaryContactNumber"
+			column="EMP_SEC_CONTACT_NUM" />
+		<result property="address" column="EMP_ADDRESS" typeHandler="com.nextgen.spring.typehandler.AddressTypeHandler"/>
+		<result property="empCountry" column="EMP_COUNTRY" />
+		<result property="empContactPersonName"
+			column="EMP_CONTACT_PERSON_NAME" /> -->
+
+	</resultMap>
+	
+	<select id="getBranchTableNextID">
+			SELECT AUTO_INCREMENT
+			FROM information_schema.tables
+			WHERE TABLE_SCHEMA = "DEV_MIND_EMPLOYMENT_EXCHANGE"
+			AND TABLE_NAME = "DEV_MIND_EMPLOYER_BRANCH_DETAILS";
+	</select>
+	
+	<select id="getQualificationIds" parameterType="Map" resultType="java.lang.Integer" >
+			select QUALIFICATION_ID from EDU_QUALIFICATION_DETAILS where customer_id=#{custId};
+	</select>
+	
+	<select id="getWEIds" parameterType="Map" resultType="java.lang.Integer">
+			select EXPERIENCE_ID from WORK_EXPERIENCE_DETAILS where customer_id=#{custId};
+	</select>
+	
+	<select id="getAwardIds" parameterType="Map" resultType="java.lang.Integer">
+			select AWARD_ID from AWARD_DETAILS where customer_id=#{custId};
+	</select>
+	
+	<select id="getAllJobSeekers" resultType="cutomerDetails" resultMap="result">
+			select distinct C.CUSTOMER_ID,C.CUSTOMER_DETAILS_CLOB from CUSTOMER_DETAILS C, EDU_QUALIFICATION_DETAILS E where C.CUSTOMER_ID=E.CUSTOMER_ID
+	</select>
+	
+	<select id="searchCustomerDetails" resultType="cutomerDetails" resultMap="result">
+			
+			select distinct CUSTOMER_ID, CUSTOMER_DETAILS_CLOB from (select C.CUSTOMER_ID as CUSTOMER_ID, C.CUSTOMER_DETAILS_CLOB as CUSTOMER_DETAILS_CLOB,
+			match(C.FIRST_NAME, C.LAST_NAME,C.ADHAR_NUM,C.RATION_CARD_NUM, C.DRIVING_LICENSE_NUM, C.VOTER_ID_NUM, C.PASSPORT_NUMBER,C.VEHICLE_NUMBER, C.EMAIL,CONTACT_NUM,
+			C.ADDRESS_VILLAGE_OR_TOWN,C.ADDRESS_CITY,C.ADDRESS_ZIP,C.ADDRESS_STATE,C.ADDRESS_COUNTRY) against (#{searchKey} IN BOOLEAN MODE) as t1_match,
+			match(F.QUALIFICATION_NAME, F.INSTITUTION_NAME,F.UNIVERSITY_OR_BOARD_NAME,F.CITY,F.STATE,F.COUNTRY,F.MARKS_PERCENTAGE) against (#{searchKey} IN BOOLEAN MODE) as t2_match
+			from CUSTOMER_DETAILS C right outer join EDU_QUALIFICATION_DETAILS F on C.CUSTOMER_ID = F.CUSTOMER_ID  
+			) as S where S.t1_match > 0 OR S.t2_match > 0
+			UNION 
+			select distinct CUSTOMER_ID, CUSTOMER_DETAILS_CLOB from (select C.CUSTOMER_ID as CUSTOMER_ID, C.CUSTOMER_DETAILS_CLOB as CUSTOMER_DETAILS_CLOB,
+			match(C.FIRST_NAME, C.LAST_NAME,C.ADHAR_NUM,C.RATION_CARD_NUM, C.DRIVING_LICENSE_NUM, C.VOTER_ID_NUM, C.PASSPORT_NUMBER,C.VEHICLE_NUMBER, C.EMAIL,CONTACT_NUM,
+			C.ADDRESS_VILLAGE_OR_TOWN,C.ADDRESS_CITY,C.ADDRESS_ZIP,C.ADDRESS_STATE,C.ADDRESS_COUNTRY) against (#{searchKey} IN BOOLEAN MODE) as t1_match,
+			match(F.QUALIFICATION_NAME, F.INSTITUTION_NAME,F.UNIVERSITY_OR_BOARD_NAME,F.CITY,F.STATE,F.COUNTRY,F.MARKS_PERCENTAGE) against (#{searchKey} IN BOOLEAN MODE) as t2_match
+			from CUSTOMER_DETAILS C left outer join EDU_QUALIFICATION_DETAILS F on C.CUSTOMER_ID = F.CUSTOMER_ID  
+			) as S where S.t1_match > 0 OR S.t2_match > 0 
+	</select>
+	
+	<insert id="createCustomerDetail" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
+		
+		insert into CUSTOMER_DETAILS(APP_TYPE,FIRST_NAME,LAST_NAME,DOB,ADHAR_NUM,RATION_CARD_NUM,DRIVING_LICENSE_NUM,VOTER_ID_NUM,PASSPORT_NUMBER,PAN_ID_NUM,EMAIL,CONTACT_NUM,ADDRESS_STREET,
+		ADDRESS_VILLAGE_OR_TOWN,ADDRESS_CITY,ADDRESS_ZIP,ADDRESS_STATE,ADDRESS_COUNTRY,CUSTOMER_DETAILS_CLOB) 
+		values 
+		('JSMS', 
+		#{details.firstName}, 
+		#{details.lastName}, 
+		#{details.dob}, 
+		#{details.aadharNumber},
+		#{details.rationCardNumber},
+		#{details.drivingLicenseNumber},
+		#{details.voterIdNumber},
+		#{details.passportNumber},
+		#{details.panIdNumber},
+		#{details.email},
+		#{details.contactNumber},
+		#{details.address.addressLine1},
+		#{details.address.addressLine2},
+		#{details.address.city},
+		#{details.address.zip},
+		#{details.address.state},
+		#{details.address.country},
+		#{customerDetailClob, typeHandler=com.narpavi.common.typehandler.CustomerDetailTypeHandler}
+		)
+	</insert>
+	<!-- AWARD_ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+AWARD_NAME VARCHAR(50) NOT NULL,
+INSTITUTION_NAME VARCHAR(50) NOT NULL,
+CUSTOMER_ID INT NOT NULL,
+AWARD_DESC VARCHAR(500) NOT NULL, -->
+	<insert id="createAwardDetail" parameterType="Map" useGeneratedKeys="true" keyProperty="Id">
+		
+		insert into AWARD_DETAILS(AWARD_NAME,INSTITUTION_NAME,CUSTOMER_ID,AWARD_DESC) 
+		values 
+		(#{awardDetail.awardName}, 
+		#{awardDetail.institution},
+		#{id}, 
+		#{awardDetail.awardDesc}
+		)
+	
+	</insert>
+	<!-- QUALIFICATION_NAME VARCHAR(20) NOT NULL,
+CUSTOMER_ID INT NOT NULL,
+DEPARTMENT_NAME VARCHAR(20),
+INSTITUTION_NAME VARCHAR(50),
+UNIVERSITY_OR_BOARD_NAME VARCHAR(50),
+CITY VARCHAR(25),
+STATE VARCHAR(25),
+COUNTRY VARCHAR(25),
+MARKS_PERCENTAGE VARCHAR(6),
+EDU_QUALIFICATION_DETAILS_CLOB TEXT, -->
+	<insert id="createQualificationDetail" parameterType="Map" useGeneratedKeys="true" keyProperty="Id">
+		
+		insert into EDU_QUALIFICATION_DETAILS(QUALIFICATION_NAME,CUSTOMER_ID,DEPARTMENT,INSTITUTION_NAME,
+		UNIVERSITY_OR_BOARD_NAME,CITY, STATE, COUNTRY,MARKS_PERCENTAGE,EDU_QUALIFICATION_DETAILS_CLOB) 
+		values 
+		(#{qualificationDetail.qualificationName}, 
+		#{id}, 
+		#{qualificationDetail.department},
+		#{qualificationDetail.institution},
+		#{qualificationDetail.university},
+		#{qualificationDetail.address.city},
+		#{qualificationDetail.address.state},
+		#{qualificationDetail.address.country},
+		#{qualificationDetail.marks},
+		#{qualificationDetailClob, typeHandler=com.narpavi.jsms.typehandler.QualificationDetailTypeHandler}
+		)
+	
+	</insert>
+	<!-- COMPANY_NAME VARCHAR(50) NOT NULL,
+CUSTOMER_ID INT NOT NULL,
+DESIGNATION VARCHAR(25) NOT NULL,
+JOB_DESC VARCHAR(1000) NOT NULL, -->
+	<insert id="createWorkExperienceDetail" parameterType="Map" useGeneratedKeys="true" keyProperty="Id">
+		
+		insert into WORK_EXPERIENCE_DETAILS(COMPANY_NAME,CUSTOMER_ID,DESIGNATION,JOB_DESC) 
+		values 
+		(#{workExperienceDetail.employerName}, 
+		#{id}, 
+		#{workExperienceDetail.designation},
+		#{workExperienceDetail.jobDesc}
+		)
+	
+	</insert>
+	
+	<update id="updateCustomerDetailClob" parameterType="Map">
+		
+		update CUSTOMER_DETAILS set
+		CUSTOMER_DETAILS_CLOB=#{customerDetailClob, typeHandler=com.narpavi.common.typehandler.CustomerDetailTypeHandler}
+		where CUSTOMER_ID=#{custId}
+	
+	</update>
+
+	<update id="updateCustomerDetails" parameterType="Map">
+		
+		update CUSTOMER_DETAILS set
+		FIRST_NAME=#{customerDetailClob.firstName},
+		LAST_NAME=#{customerDetailClob.lastName},
+		DOB=#{customerDetailClob.dob},
+		ADHAR_NUM=#{customerDetailClob.aadharNumber},
+		RATION_CARD_NUM=#{customerDetailClob.rationCardNumber},
+		DRIVING_LICENSE_NUM=#{customerDetailClob.drivingLicenseNumber},
+		VOTER_ID_NUM=#{customerDetailClob.voterIdNumber},
+		PASSPORT_NUMBER=#{customerDetailClob.passportNumber},
+		PAN_ID_NUM=#{customerDetailClob.panIdNumber},
+		EMAIL=#{customerDetailClob.email},
+		CONTACT_NUM=#{customerDetailClob.contactNumber},
+		ADDRESS_STREET=#{customerDetailClob.address.addressLine1},
+		ADDRESS_VILLAGE_OR_TOWN=#{customerDetailClob.address.addressLine2},
+		ADDRESS_CITY=#{customerDetailClob.address.city},
+		ADDRESS_ZIP=#{customerDetailClob.address.zip},
+		ADDRESS_STATE=#{customerDetailClob.address.state}, 
+		ADDRESS_COUNTRY=#{customerDetailClob.address.country}, 
+		CUSTOMER_DETAILS_CLOB=#{customerDetailClob, typeHandler=com.narpavi.common.typehandler.CustomerDetailTypeHandler}
+		where CUSTOMER_ID=#{id}
+	
+	</update>
+
+ 	<update id="updateQualificationDetail" parameterType="Map">
+ 	
+		update EDU_QUALIFICATION_DETAILS set
+		QUALIFICATION_NAME=#{qualificationDetail.qualificationName}, 
+		DEPARTMENT=#{qualificationDetail.department}, 
+		INSTITUTION_NAME=#{qualificationDetail.institution},
+		UNIVERSITY_OR_BOARD_NAME=#{qualificationDetail.university}, 
+		CITY=#{qualificationDetail.address.city},
+		STATE=#{qualificationDetail.address.state},
+		COUNTRY=#{qualificationDetail.address.country},
+		MARKS_PERCENTAGE=#{qualificationDetail.marks},
+		EDU_QUALIFICATION_DETAILS_CLOB=#{qualificationDetailClob, typeHandler=com.narpavi.jsms.typehandler.QualificationDetailTypeHandler}
+		where QUALIFICATION_ID=#{qualificationDetail.id} and CUSTOMER_ID=#{custId}
+	
+	</update>
+	
+	<update id="updateWorkExperienceDetail" parameterType="Map">
+		
+		update WORK_EXPERIENCE_DETAILS set 
+		COMPANY_NAME=#{workExperienceDetail.employerName}, 
+		DESIGNATION=#{workExperienceDetail.designation},
+		JOB_DESC=#{workExperienceDetail.jobDesc}
+		where EXPERIENCE_ID=#{workExperienceDetail.id} and CUSTOMER_ID=#{custId}
+	
+	</update>
+	
+	<update id="updateAwardDetail" parameterType="Map">
+		
+		update AWARD_DETAILS set AWARD_NAME=#{awardDetail.awardName}, 
+		INSTITUTION_NAME=#{awardDetail.institution},
+		AWARD_DESC=#{awardDetail.awardDesc}
+		where AWARD_ID=#{awardDetail.id} and CUSTOMER_ID=#{custId}
+	
+	</update>
+	
+	<delete id="deleteQualificationDetail" parameterType="Map">
+		delete from EDU_QUALIFICATION_DETAILS where QUALIFICATION_ID=#{qualId, mode=IN, jdbcType=INTEGER, javaType=Integer}
+	</delete>
+	
+	<delete id="deleteWorkExperienceDetail" parameterType="Map">
+		delete from WORK_EXPERIENCE_DETAILS where EXPERIENCE_ID=#{expId, mode=IN, jdbcType=INTEGER, javaType=Integer}
+	</delete>
+	
+	<delete id="deleteAwardDetail" parameterType="Map">
+		delete from AWARD_DETAILS where AWARD_ID=#{awardId, mode=IN, jdbcType=INTEGER, javaType=Integer}
+	</delete>
+	
+	<delete id="deleteQualificationDetailByCustomer" parameterType="Map">
+		delete from EDU_QUALIFICATION_DETAILS where CUSTOMER_ID=#{custID, mode=IN, jdbcType=INTEGER, javaType=Integer} 
+	</delete>
+	
+	<delete id="deleteWorkExperienceDetailByCustomer" parameterType="Map">
+		delete from WORK_EXPERIENCE_DETAILS where CUSTOMER_ID=#{custID, mode=IN, jdbcType=INTEGER, javaType=Integer} 
+	</delete>
+	
+	<delete id="deleteAwardDetailByCustomer" parameterType="Map">
+		delete from AWARD_DETAILS where CUSTOMER_ID=#{custID, mode=IN, jdbcType=INTEGER, javaType=Integer} 
+	</delete>
+	
+	
+
+	<delete id="deleteCustomerDetail" parameterType="Map">
+		
+		delete from CUSTOMER_DETAILS where CUSTOMER_ID=#{custID, mode=IN, jdbcType=INTEGER, javaType=Integer} 
+			<!-- <foreach collection="employerIds" item="empId" index="index" open="(" close=")" separator=",">
+			#{empId}
+			</foreach> -->
+	</delete>
+	
+<!-- 	<delete id="deleteFinanceDetail" parameterType="Map">
+		
+		delete from FINANCE_DETAILS where CUSTOMER_ID=#{custID, mode=IN, jdbcType=INTEGER, javaType=Integer}
+			<foreach collection="employerIds" item="empId" index="index" open="(" close=")" separator=",">
+			
+			</foreach>
+	</delete> -->
+<!--	 -->
+	<!-- <select id="getAllEmployersById" resultType="employer" resultMap="result">
+			select * from DEV_MIND_EMPLOYER_DETAILS where EMP_ID IN 
+			<foreach collection="empIds" item="empId" index="index" open="(" close=")" separator=",">
+			#{empId}
+			</foreach>
+			and EMP_NAME=#{empName, mode=IN, jdbcType=VARCHAR, javaType=String}
+	</select>
+	
+	<select id="getSingleValue" parameterType="Map" resultType="java.lang.Integer">
+			select emp_id from DEV_MIND_EMPLOYER_DETAILS
+	</select>
+	
+	<select id="getSingleValue" parameterType="Map" resultType="java.lang.String">
+			select emp_Name from DEV_MIND_EMPLOYER_DETAILS
+	</select> -->
+	
+	
+
+</mapper>

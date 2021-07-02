@@ -1,0 +1,151 @@
+	table.scroll {
+    width: 100%;
+    border-spacing: 0;
+    border: 2px solid #fff;
+}
+
+table.scroll th,
+table.scroll td,
+table.scroll tr,
+table.scroll thead,
+table.scroll tbody { display: block; }
+
+/*table.scroll thead tr {*/
+    /* fallback */
+    /* width: 97%; */
+    /* minus scroll bar width */
+    /* width: -webkit-calc(100% - 16px);
+    width:    -moz-calc(100% - 16px);
+    width:         calc(100% - 16px);
+} */
+
+table.scroll tr:after {
+    content: ' ';
+    display: block;
+    visibility: hidden;
+    clear: both;
+}
+
+table.scroll tbody {
+    height: 50px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+table.scroll tbody td,
+table.scroll thead th {
+    width: 31.5%;
+    float: left;
+    border-right: 1px solid #fff;
+}
+
+table.edu tbody td,
+thead th {
+    width: 20%;
+    float: left;
+    border-right: 1px solid #fff;
+}
+
+table.scroll thead tr th { 
+    height: 30px;
+    line-height: 30px;
+    /* text-align: center; */
+}
+
+table.scroll tbody { border-top: 2px solid #fff; }
+
+table.scroll tbody td:last-child, thead th:last-child {
+    border-right: none !important;
+     width: 5%;
+}
+
+table.jobSeekers {
+    width: 100%;
+    border-spacing: 0;
+    border: 2px solid #fff;
+}
+
+table.jobSeekers th,
+table.jobSeekers td,
+table.jobSeekers tr,
+table.jobSeekers thead,
+table.jobSeekers tbody { display: block; }
+
+table.jobSeekers tr:after {
+    content: ' ';
+    display: block;
+    visibility: hidden;
+    clear: both;
+}
+
+table.jobSeekers tbody {
+    height: 465px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border:1px solid red;
+}
+
+table.jobSeekers tbody td,
+table.jobSeekers thead th {
+    width: 15%;
+    float: left;
+    border-right: 1px solid #fff;
+}
+
+table.jobSeekers thead tr th { 
+    height: 30px;
+    line-height: 30px;
+    /*text-align: left;*/
+}
+
+table.jobSeekers tbody { border-top: 2px solid #fff; }
+
+table.jobSeekers tbody td:last-child, thead th:last-child {
+    border-right: none !important;
+     width: 5%;
+}
+
+table.edu {
+    width: 100%;
+    border-spacing: 0;
+    border: 2px solid #fff;
+}
+
+table.edu th,
+table.edu td,
+table.edu tr,
+table.edu thead,
+table.edu tbody { display: block; }
+
+table.edu tr:after {
+    content: ' ';
+    display: block;
+    visibility: hidden;
+    clear: both;
+}
+
+table.edu tbody {
+    height: 91px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+table.edu tbody td,
+table.edu thead th {
+    width: 19%;
+    float: left;
+    border-right: 1px solid #fff;
+}
+
+table.edu thead tr th { 
+    height: 30px;
+    line-height: 30px;
+    /*text-align: left;*/
+}
+
+table.edu tbody { border-top: 2px solid #fff; }
+
+table.edu tbody td:last-child, thead th:last-child {
+    border-right: none !important;
+     width: 5%;
+}
